@@ -1,6 +1,6 @@
 # 91 line container
 
-I've implemented this Go container as shown on Liz Rice's video on containerization [Container Camp](https://www.youtube.com/watch?v=Utf-A4rODH8) to deeply understand how containers really work under the hood, namespaces like the important namespace which is PID. It's 41 lines longer than the one in the video demo plus I haven't added CGroups (for the resource sharing between processes) nor the root filesystem management (for downloading and caching the root filesystem images that are being pivotrooted into). In this scenario, I've also used Pivotroot to swap the host and container's root, used Busybox distro as the root filesystem, though you can any distro of your preference, like CentOS, Ubuntu etc.
+I've implemented this Go container as shown on Liz Rice's video on containerization [Container Camp](https://www.youtube.com/watch?v=Utf-A4rODH8) to deeply understand how containers really work under the hood, namespaces like the important namespace which is PID. It's 41 lines longer than the one in the video demo plus I haven't added the root filesystem management (for downloading and caching the root filesystem images that are being pivotrooted into). In this scenario, I've also used Pivotroot to swap the host and container's root, used Busybox distro as the root filesystem, though you can any distro of your preference, like CentOS, Ubuntu etc.
 
 ### Caution ⚠️⚠️
  A word of advice: It's not production-ready, and I strongly advise you not to deploy it to production. If you do deploy it, then it's on you.
