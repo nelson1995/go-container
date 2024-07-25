@@ -10,7 +10,14 @@ import (
 )
 
 func main() {
-	switch os.Args[1] {
+	if err := run(os.Args); err != nil {
+		os.Exit(1)
+		return
+	}
+}
+
+func run(args []string) error {
+	switch args[1] {
 	case "run":
 		parent()
 	case "child":
@@ -18,12 +25,13 @@ func main() {
 	default:
 		panic("What should i do ?")
 	}
+	return nil
 }
 
 func parent() {
 	cmd := exec.Command("/proc/self/exe", append([]string{"child"}, os.Args[2:]...)...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET,
 		Unshareflags: syscall.CLONE_NEWNS, // Host musn't share it's namespace with container
 	}
 
@@ -43,8 +51,8 @@ func child() {
 	cntroot := "/tmp/go-fs/rootfs"
 	hostroot := filepath.Join(cntroot, "/.hostroot")
 
-	// Add CGroups
-	addCGroups()
+	// Add CGroup
+	addCGroup()
 
 	// Create a proc directory and mount it
 	mountDir(cntroot, "proc")
@@ -56,10 +64,10 @@ func child() {
 	must(os.Chdir("/"))
 
 	// unmount the host's "/" point
-	// hostroot = "/.hostroot"
-	// must(syscall.Unmount(hostroot, syscall.MNT_DETACH))
-	// // remove hostroot
-	// must(os.RemoveAll(hostroot))
+	hostroot = "/.hostroot"
+	must(syscall.Unmount(hostroot, syscall.MNT_DETACH))
+	// remove hostroot
+	must(os.RemoveAll(hostroot))
 
 	cmd := exec.Command(os.Args[2], os.Args[3:]...)
 	cmd.Stdin = os.Stdin
@@ -85,7 +93,7 @@ func mountDir(cntroot string, dirname string) {
 	must(syscall.Mount(source, target, fstype, uintptr(flag), data))
 }
 
-func addCGroups() {
+func addCGroup() {
 	cgs := "/sys/fs/cgroup"
 	pids := filepath.Join(cgs, "pids")
 	err := os.MkdirAll(filepath.Join(pids, "go-cntr"), 0755)
