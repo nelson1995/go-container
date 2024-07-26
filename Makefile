@@ -1,5 +1,6 @@
 PACKAGE_PATH := ./cmd/go-container
 BINARY_NAME := go-container
+CONTAINER_SHELL := /bin/bash
 
 ## build: build the application
 build:
